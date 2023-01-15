@@ -15,5 +15,5 @@ public class AvailableOffers {
     private float discountValue;
     private String endDate;
 
-    private List<OfferDetails> offerList;
+    private List<OfferDetails> compatibleOfferList;
 }

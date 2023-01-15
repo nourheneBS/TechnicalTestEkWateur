@@ -2,10 +2,15 @@ package fr.joul.cie.test.springtechnicaltest.services;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.joul.cie.test.springtechnicaltest.entities.AvailableOffers;
 import fr.joul.cie.test.springtechnicaltest.entities.Offer;
+import fr.joul.cie.test.springtechnicaltest.entities.OfferDetails;
 import fr.joul.cie.test.springtechnicaltest.entities.PromoCode;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.LocalDate;
@@ -13,8 +18,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class AvailableOffersService implements IAvailableOffersService{
 
     @Override
@@ -38,7 +45,7 @@ public class AvailableOffersService implements IAvailableOffersService{
                 ObjectMapper mapper = new ObjectMapper();
                 promoCodesList = mapper.readValue(url, new TypeReference<List<PromoCode>>() {});
                 for (PromoCode pcode : promoCodesList) {
-                    System.out.println("nième Promocode: " + pcode);
+                    log.trace("Promocode: " + pcode);
                 }
             }
 
@@ -66,17 +73,19 @@ public class AvailableOffersService implements IAvailableOffersService{
     public boolean isValid(String code) {
         PromoCode promoCode =  this.getPromoCodeByCode(code);
         boolean valid = false;
+        if(promoCode!=null){
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            //convert String to LocalDate
+            LocalDate pc_endDate = LocalDate.parse(promoCode.getEndDate(), formatter);
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        //convert String to LocalDate
-        LocalDate pc_endDate = LocalDate.parse(promoCode.getEndDate(), formatter);
-
-        if(promoCode!=null && pc_endDate.isAfter(LocalDate.now())){
-            return true;
+            if(pc_endDate.isAfter(LocalDate.now())) {
+                valid = true;
+                log.info("Valid promo code! ");
+            } else {
+                log.info("Expired promo code! ");
+            }
         }
-        else {
-            return false;
-        }
+        return valid;
     }
 
     @Override
@@ -100,7 +109,7 @@ public class AvailableOffersService implements IAvailableOffersService{
                 ObjectMapper mapper = new ObjectMapper();
                 offerList = mapper.readValue(url, new TypeReference<List<Offer>>() {});
                 for (Offer ofr : offerList) {
-                    System.out.println("Another offer: " + ofr);
+                    log.trace("Offer: "+ ofr);
                 }
             }
 
@@ -109,4 +118,42 @@ public class AvailableOffersService implements IAvailableOffersService{
         }
         return offerList;
     }
+
+    @Override
+    public AvailableOffers getCompatibleOffers(PromoCode promoCode) {
+        AvailableOffers availableOffersResult = new AvailableOffers();
+        List<OfferDetails>  offerDetailsList = new ArrayList<OfferDetails>();
+
+        //collect compatible offers
+        List<Offer> offerList = this.getAllOffers().stream()
+                .filter(x-> x.getValidPromoCodeList()
+                        .contains(promoCode.getCode())).collect(Collectors.toList());
+        //If compatible offers found -> create Result Object (AvailableOffers)
+        if(!offerList.isEmpty()) {
+            for (Offer ofr : offerList) {
+                availableOffersResult.setCode(promoCode.getCode());
+                availableOffersResult.setEndDate(promoCode.getEndDate());
+                availableOffersResult.setDiscountValue(promoCode.getDiscountValue());
+                offerDetailsList.add(new OfferDetails(ofr.getOfferName(), ofr.getOfferType()));
+            }
+            availableOffersResult.setCompatibleOfferList(offerDetailsList);
+        }
+
+        return availableOffersResult;
+    }
+
+    @Override
+    public void createResultFile(AvailableOffers availableOffers){
+        ObjectMapper mapper = new ObjectMapper();
+        //Save "availableOffers" in a JSON File
+        File resultFile = new File("availableOffers.json");
+        try {
+            mapper.writeValue(resultFile, availableOffers);
+            log.info("availableOffers.JSON created");
+        } catch (IOException e) {
+            log.info("Could not create file");
+            throw new RuntimeException(e);
+        }
+    }
+
 }

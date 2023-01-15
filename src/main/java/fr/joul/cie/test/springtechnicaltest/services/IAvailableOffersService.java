@@ -1,5 +1,6 @@
 package fr.joul.cie.test.springtechnicaltest.services;
 
+import fr.joul.cie.test.springtechnicaltest.entities.AvailableOffers;
 import fr.joul.cie.test.springtechnicaltest.entities.Offer;
 import fr.joul.cie.test.springtechnicaltest.entities.PromoCode;
 
@@ -15,8 +16,9 @@ public interface IAvailableOffersService {
 
     public List<Offer> getAllOffers();
 
+    public AvailableOffers getCompatibleOffers(PromoCode promoCode);
 
-
+    public void createResultFile(AvailableOffers availableOffers);
 
 
 }

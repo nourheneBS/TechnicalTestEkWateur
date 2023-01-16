@@ -75,6 +75,7 @@ class AvailableOffersServiceTest {
 
     @Test
     void getCompatibleOffers() {
+
         fail("not implemented yet");
     }
 

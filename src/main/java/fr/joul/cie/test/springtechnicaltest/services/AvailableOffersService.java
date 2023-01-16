@@ -43,6 +43,7 @@ public class AvailableOffersService implements IAvailableOffersService{
                 throw new RuntimeException("HttpResponseCode: " + responseCode);
             } else {
                 ObjectMapper mapper = new ObjectMapper();
+                //save JSON promoCodes from mockApi in a List of POJO PromoCode
                 promoCodesList = mapper.readValue(url, new TypeReference<List<PromoCode>>() {});
                 for (PromoCode pcode : promoCodesList) {
                     log.trace("Promocode: " + pcode);
@@ -73,18 +74,17 @@ public class AvailableOffersService implements IAvailableOffersService{
     public boolean isValid(String code) {
         PromoCode promoCode =  this.getPromoCodeByCode(code);
         boolean valid = false;
-        if(promoCode!=null){
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             //convert String to LocalDate
             LocalDate pc_endDate = LocalDate.parse(promoCode.getEndDate(), formatter);
 
-            if(pc_endDate.isAfter(LocalDate.now())) {
+            if (pc_endDate.isAfter(LocalDate.now())) {
                 valid = true;
                 log.info("Valid promo code! ");
             } else {
-                log.info("Expired promo code! ");
+                log.warn("promo code is not valid (expired)! ");
             }
-        }
+
         return valid;
     }
 
@@ -107,6 +107,7 @@ public class AvailableOffersService implements IAvailableOffersService{
             } else {
 
                 ObjectMapper mapper = new ObjectMapper();
+                //save JSON offers from mockApi in a List of POJO offers
                 offerList = mapper.readValue(url, new TypeReference<List<Offer>>() {});
                 for (Offer ofr : offerList) {
                     log.trace("Offer: "+ ofr);
@@ -124,20 +125,19 @@ public class AvailableOffersService implements IAvailableOffersService{
         AvailableOffers availableOffersResult = new AvailableOffers();
         List<OfferDetails>  offerDetailsList = new ArrayList<OfferDetails>();
 
-        //collect compatible offers
-        List<Offer> offerList = this.getAllOffers().stream()
-                .filter(x-> x.getValidPromoCodeList()
-                        .contains(promoCode.getCode())).collect(Collectors.toList());
-        //If compatible offers found -> create Result Object (AvailableOffers)
-        if(!offerList.isEmpty()) {
-            for (Offer ofr : offerList) {
-                availableOffersResult.setCode(promoCode.getCode());
-                availableOffersResult.setEndDate(promoCode.getEndDate());
-                availableOffersResult.setDiscountValue(promoCode.getDiscountValue());
-                offerDetailsList.add(new OfferDetails(ofr.getOfferName(), ofr.getOfferType()));
+            List<Offer> offerList = this.getAllOffers().stream()
+                    .filter(x -> x.getValidPromoCodeList()
+                            .contains(promoCode.getCode())).collect(Collectors.toList());
+            //If compatible offers found -> create Result Object (AvailableOffers)
+            if (!offerList.isEmpty()) {
+                for (Offer ofr : offerList) {
+                    availableOffersResult.setCode(promoCode.getCode());
+                    availableOffersResult.setEndDate(promoCode.getEndDate());
+                    availableOffersResult.setDiscountValue(promoCode.getDiscountValue());
+                    offerDetailsList.add(new OfferDetails(ofr.getOfferName(), ofr.getOfferType()));
+                }
+                availableOffersResult.setCompatibleOfferList(offerDetailsList);
             }
-            availableOffersResult.setCompatibleOfferList(offerDetailsList);
-        }
 
         return availableOffersResult;
     }

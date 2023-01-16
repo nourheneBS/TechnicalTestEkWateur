@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -41,22 +42,21 @@ public class AvailableOffersService implements IAvailableOffersService{
             if (responseCode != 200) {
                 throw new RuntimeException("HttpResponseCode: " + responseCode);
             } else {
-
                 ObjectMapper mapper = new ObjectMapper();
                 promoCodesList = mapper.readValue(url, new TypeReference<List<PromoCode>>() {});
                 for (PromoCode pcode : promoCodesList) {
                     log.trace("Promocode: " + pcode);
                 }
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         return promoCodesList;
     }
 
     @Override
-    public PromoCode getPromoCodeByCode(String code){
+    public PromoCode getPromoCodeByCode(String code) {
         Optional<PromoCode> pc= this.getAllPromoCodes().stream().filter(
                 x -> x.getCode().equals(code)).findAny();
         PromoCode pcRes = pc.orElse(null);

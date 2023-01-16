@@ -9,7 +9,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import java.util.List;
 
 @SpringBootApplication
 @Slf4j
@@ -28,6 +27,7 @@ public class SpringTechnicalTestApplication implements CommandLineRunner {
 		String MON_CODE_PROMO_A_TESTER = args[0];
 		log.trace("MON_CODE_PROMO_A_TESTER: " + MON_CODE_PROMO_A_TESTER);
 
+		//TODO: refactor code
 		//if MON_CODE_PROMO_A_TESTER is valid && not null
 		if (availableOffersService.isValid(MON_CODE_PROMO_A_TESTER)) {
 			PromoCode promoCode = availableOffersService.getPromoCodeByCode(MON_CODE_PROMO_A_TESTER);
@@ -42,7 +42,11 @@ public class SpringTechnicalTestApplication implements CommandLineRunner {
 				}
 
 		} else { //if promo code not found in promocodeList || MON_CODE_PROMO_A_TESTER == null
-			log.info("the promo code is not valid!");
+			if (MON_CODE_PROMO_A_TESTER==null){ // MON_CODE_PROMO_A_TESTER == null
+				log.info("you probably forgot to enter the promo code.. Please try again!");
+			} else { //if promo code not found in promocodeList
+				log.info("the promo code is not valid!");
+			}
 		}
 
 	}

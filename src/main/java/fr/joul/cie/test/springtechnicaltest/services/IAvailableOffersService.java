@@ -4,6 +4,8 @@ import fr.joul.cie.test.springtechnicaltest.entities.AvailableOffers;
 import fr.joul.cie.test.springtechnicaltest.entities.Offer;
 import fr.joul.cie.test.springtechnicaltest.entities.PromoCode;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.List;
 
 public interface IAvailableOffersService {

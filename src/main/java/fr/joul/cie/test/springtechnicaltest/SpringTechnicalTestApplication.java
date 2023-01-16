@@ -48,10 +48,8 @@ public class SpringTechnicalTestApplication implements CommandLineRunner {
 
 		} catch (IndexOutOfBoundsException e){
 			log.warn("You probably forgot to enter MON_CODE_PROMO_A_TESTER.. please try again!");
+
 		}
-
-
-
 
 	}
 }

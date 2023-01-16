@@ -68,20 +68,5 @@ class AvailableOffersServiceTest {
         assertTrue(availableOffersService.isValid("ALL_2000"));
     }
 
-    @Test
-    void getAllOffers() {
-        //fail("not implemented yet");
-    }
 
-    @Test
-    void getCompatibleOffers() {
-
-        fail("not implemented yet");
-    }
-
-    @Test
-    void createResultFile() {
-
-        fail("not implemented yet");
-    }
 }

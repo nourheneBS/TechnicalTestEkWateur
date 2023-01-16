@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -45,8 +44,8 @@ public class AvailableOffersService implements IAvailableOffersService{
                 ObjectMapper mapper = new ObjectMapper();
                 //save JSON promoCodes from mockApi in a List of POJO PromoCode
                 promoCodesList = mapper.readValue(url, new TypeReference<List<PromoCode>>() {});
-                for (PromoCode pcode : promoCodesList) {
-                    log.trace("Promocode: " + pcode);
+                for (PromoCode pCode : promoCodesList) {
+                    log.trace("PromoCode: " + pCode);
                 }
             }
         } catch (Exception e) {
@@ -67,8 +66,6 @@ public class AvailableOffersService implements IAvailableOffersService{
 
     /***
      *  check if the promo code has not expired (valid)
-     * @param code
-     * @return boolean
      */
     @Override
     public boolean isValid(String code) {
